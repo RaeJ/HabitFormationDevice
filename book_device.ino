@@ -9,11 +9,21 @@ Adafruit_NeoMatrix matrix = Adafruit_NeoMatrix(8, 8, 2, 1, PIN,
   NEO_MATRIX_BOTTOM + NEO_MATRIX_LEFT + NEO_MATRIX_ROWS + NEO_MATRIX_ZIGZAG,
   NEO_GRB + NEO_KHZ800);
 
-const uint16_t colors[] = {
-  matrix.Color(255, 0, 0), matrix.Color(0, 255, 0), matrix.Color(255, 255, 0),matrix.Color(0, 0, 255), matrix.Color(255, 0, 255), matrix.Color(0, 255, 255), matrix.Color(255, 255, 255)};
+//------------------------------------------------------------------------------------------------------------------------//
+
+// Colours defined
+const uint16_t none = matrix.Color(0, 0, 0);
+const uint16_t red = matrix.Color(255, 0, 0);
+const uint16_t green = matrix.Color(0, 255, 0);
+const uint16_t blue = matrix.Color(0, 0, 255);
+const uint16_t white = matrix.Color(255, 255, 255);
+const uint16_t yellow = matrix.Color(255, 255, 0);
+const uint16_t purple = matrix.Color(255, 0, 255);
+const uint16_t turquiose = matrix.Color(0, 255, 255);
 
 //------------------------------------------------------------------------------------------------------------------------//
 
+// Mode of intensity
 char subtle = 'S';
 char mediocre = 'M';
 char intensive = 'I';
@@ -22,48 +32,39 @@ char mode = subtle;
 
 //------------------------------------------------------------------------------------------------------------------------//
 
-int speed;
-
 void setup() {
 
   switch( mode ){
     case 'I':
-      speed = 50;
-      matrix.setBrightness(50);
+      matrix.setBrightness(75);
       break;
     case 'M':
-      speed = 75;
-      matrix.setBrightness(20);
+      matrix.setBrightness(30);
       break;
     default: // subtle
-      speed = 100;
-      matrix.setBrightness(5);
+      matrix.setBrightness(15);
   }
   
   matrix.begin();
   matrix.setTextWrap(false);
-  matrix.setTextColor(colors[0]);
 }
-
-int x    = matrix.width();
-int pass = 0;
-
 
 void loop() {
   // Some example procedures showing how to display to the pixels:
-//  colorWipe(matrix.Color(255, 0, 0), 20); // Red
-//  colorWipe(matrix.Color(0, 255, 0), 20); // Green
-//  colorWipe(matrix.Color(0, 0, 255), 20); // Blue
-
+  colorWipe(red, 20); // Red
+  colorWipe(green, 20); // Green
+  colorWipe(blue, 20); // Blue
+  colorWipe(none, 20); // Clear
   
   // Send a theater pixel chase in...
-//  theaterChase(matrix.Color(127, 127, 127), 50); // White
-//  theaterChase(matrix.Color(127,   0,   0), 50); // Red
-//  theaterChase(matrix.Color(  0,   0, 127), 50); // Blue
+  theaterChase(white, 50); // White
+  theaterChase(red, 50); // Red
+  theaterChase(blue, 50); // Blue
 
-  rainbow(20);
-//  rainbowCycle(20);
-//  theaterChaseRainbow(50);
+  rainbow(10);
+  rainbowPulse(10);
+  theaterChaseRainbow(50);
+  display_words( "Meditate", green, 150 );
 }
 
 // Fill the dots one after the other with a color
@@ -78,24 +79,27 @@ void colorWipe(uint32_t c, uint8_t wait) {
 }
 
 void rainbow(uint8_t wait) {
-  uint16_t i, j;
+  uint16_t i, j, x;
 
-  for(j=0; j<256; j++) {
-    for(i=0; i<294; i++) {
-      matrix.drawPixel(0, i, Wheel((i+j) & 255));
+  for(j=0; j<256*5; j++) { // 5 cycles of all colors on wheel
+    for(i=0; i< matrix.height(); i++) {
+      for(x=0; x < matrix.width(); x++){
+        matrix.drawPixel(x, i, Wheel(((i * 256 / matrix.height()) + j) & 255));
+      }
     }
     matrix.show();
     delay(wait);
   }
 }
 
-// Slightly different, this makes the rainbow equally distributed throughout
-void rainbowCycle(uint8_t wait) {
-  uint16_t i, j;
+void rainbowPulse(uint8_t wait) {
+  uint16_t i, j, x;
 
   for(j=0; j<256*5; j++) { // 5 cycles of all colors on wheel
-    for(i=0; i< 294; i++) {
-      matrix.drawPixel(0, i, Wheel(((i * 256 / 294) + j) & 255));
+    for(i=0; i< matrix.height(); i++) {
+      for(x=0; x < matrix.width(); x++){
+        matrix.drawPixel(x, i, Wheel(((i * x * 256 / ( matrix.height() * matrix.width() )) + j) & 255));
+      }
     }
     matrix.show();
     delay(wait);
@@ -130,15 +134,18 @@ void theaterChase(uint32_t c, uint8_t wait) {
 void theaterChaseRainbow(uint8_t wait) {
   for (int j=0; j < 256; j++) {     // cycle all 256 colors in the wheel
     for (int q=0; q < 3; q++) {
-        for (int i=0; i < 294; i=i+3) {
-          matrix.drawPixel(0, i+q, Wheel( (i+j) % 255));    //turn every third pixel on
+      for (int x=0; x < matrix.width(); x++) {
+        for (int i=0; i < matrix.height(); i=i+3) {
+          matrix.drawPixel(x, i+q, Wheel( (i+j) % 255));    //turn every third pixel on
         }
+      }
         matrix.show();
        
         delay(wait);
-       
-        for (int i=0; i < 294; i=i+3) {
-          matrix.drawPixel(0, i+q, 0);        //turn every third pixel off
+        for (int x=0; x < matrix.width(); x++) {
+          for (int i=0; i < matrix.height(); i=i+3) {
+            matrix.drawPixel(x, i+q, 0);        //turn every third pixel off
+          }
         }
     }
   }
@@ -159,54 +166,27 @@ uint32_t Wheel(byte WheelPos) {
   }
 }
 
-//void loop() {
-////  display_words( "Stop being nosey" );
-//  rainbowCycle(20);
-//}
-//
-//void display_words( char* message ){
-//  matrix.fillScreen(0);
-//  matrix.setCursor(x, 0);
-//  
-//  char str[50];
-//  strcpy(str, message);
-//  int len = strlen(str);
-//  
-//  matrix.print(str);
-//
-//  if(--x < (-(len*6 + 10))
-//  ) {
-//    x = matrix.width();
-//
-//    if(++pass >= 8) pass = 0;
-//    matrix.setTextColor(colors[pass]);
-//  }
-//  matrix.show();
-//  delay( speed );
-//}
-//
-//uint32_t Wheel(byte WheelPos) {
-//  WheelPos = 255 - WheelPos;
-//  if(WheelPos < 85) {
-//    return matrix.Color(255 - WheelPos * 3, 0, WheelPos * 3);
-//  }
-//  if(WheelPos < 170) {
-//    WheelPos -= 85;
-//    return matrix.Color(0, WheelPos * 3, 255 - WheelPos * 3);
-//  }
-//  WheelPos -= 170;
-//  return matrix.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
-//}
-//
-//void rainbowCycle(uint8_t wait) {
-//  uint16_t i, j;
-//
-//  for(j=0; j<256*5; j++) { // 5 cycles of all colors on wheel
-//    for(i=0; i< matrix.numPixels(); i++) {
-//      matrix.setPixelColor(i, Wheel(((i * 256 / matrix.numPixels()) + j) & 255));
-//    }
-//    matrix.show();
-//    delay(wait);
-//  }
-//}
+void display_words( char* message, uint32_t c, uint8_t wait ){
+    matrix.setTextColor(c);
+  
+    char str[50];
+    strcpy(str, message);
+    int len = strlen(str);
+    
+  for(int x = matrix.width(); x > -(len*6 + 10); x--){
+    matrix.fillScreen(0);
+    matrix.setCursor(x, 0);
+    
+    matrix.print(str);
+  
+    if(--x < (-(len*6 + 10))
+    ) {
+      x = matrix.width();
+    }
+    matrix.show();
+    delay( wait );
+  }
+  
+}
+
 
