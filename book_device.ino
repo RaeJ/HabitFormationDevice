@@ -32,6 +32,10 @@ char mode = subtle;
 
 //------------------------------------------------------------------------------------------------------------------------//
 
+char* activity = "Meditate";
+
+//------------------------------------------------------------------------------------------------------------------------//
+
 void setup() {
 
   switch( mode ){
@@ -50,21 +54,72 @@ void setup() {
 }
 
 void loop() {
-  // Some example procedures showing how to display to the pixels:
-  colorWipe(red, 20); // Red
-  colorWipe(green, 20); // Green
-  colorWipe(blue, 20); // Blue
-  colorWipe(none, 20); // Clear
-  
-  // Send a theater pixel chase in...
-  theaterChase(white, 50); // White
-  theaterChase(red, 50); // Red
-  theaterChase(blue, 50); // Blue
+  switch( mode ){
+    case 'I':
+      intense_mode();
+      break;
+    case 'M':
+      medi_mode();
+      break;
+    default: // subtle
+      subtle_mode();
+  }
+}
+
+
+void intense_mode(){
+  colorWipe(red, 10);
+  colorWipe(none, 10);
+
+  theaterChase(white, 50, 40);
+
+  colorWipe(white, 10);
+  colorWipe(none, 10);
+
+  theaterChaseRainbow(50);
+
+  colorWipe(red, 10);
+  colorWipe(none, 10);
+
+  display_words( activity, purple, 150 );
+}
+
+void medi_mode(){
+  colorWipe(purple, 20);
+  colorWipe(none, 20);
+
+  theaterChase(blue, 75, 40);
+
+  colorWipe(turquiose, 20);
+  colorWipe(none, 20);
 
   rainbow(10);
-  rainbowPulse(10);
-  theaterChaseRainbow(50);
-  display_words( "Meditate", green, 150 );
+
+  colorWipe(purple, 20);
+  colorWipe(none, 20);
+
+  theaterChase(red, 75, 40);
+
+  colorWipe(turquiose, 20);
+  colorWipe(none, 20);
+  
+  display_words( activity, purple, 150 );
+}
+
+void subtle_mode(){
+  colorWipe(blue, 30);
+  colorWipe(none, 30);
+
+  for(int i = 0; i<10; i++){
+    rainbow(20);
+  }
+  
+  colorWipe(purple, 30);
+  colorWipe(none, 30);
+
+  for(int i = 0; i<20; i++){
+    rainbowPulse(10);
+  }
 }
 
 // Fill the dots one after the other with a color
@@ -107,8 +162,8 @@ void rainbowPulse(uint8_t wait) {
 }
 
 //Theatre-style crawling lights.
-void theaterChase(uint32_t c, uint8_t wait) {
-  for (int j=0; j<10; j++) {  //do 10 cycles of chasing
+void theaterChase(uint32_t c, uint8_t wait, int cycles) {
+  for (int j=0; j<cycles; j++) {  //do 10 cycles of chasing
     for (int q=0; q < 3; q++) {
       for (int x=0; x < matrix.height(); x++) {
         for (int i=0; i < matrix.width(); i=i+3) {
