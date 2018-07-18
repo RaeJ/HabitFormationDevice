@@ -36,7 +36,7 @@ char subtle = 'S';
 char mediocre = 'M';
 char intensive = 'I';
 
-char mode = intensive;
+char mode = mediocre;
 
 //------------------------------------------------------------------------------------------------------------------------//
 
@@ -91,6 +91,9 @@ void loop() {
 
 bool respond_to_button(){
   if (digitalRead(buttonPin) == HIGH){
+    while(digitalRead(buttonPin) == HIGH){
+      //Do nowt
+    }
     colorWipe(blue, 10);
     colorWipe(none, 10);
     open_close();
@@ -102,11 +105,24 @@ bool respond_to_button(){
 void intense_mode(){
   intense_movement();
   open_close();
+  
   while(true){
-    if(display_words(activity, blue, 150)){
+    if(theaterChase(white, 50, 50)){
       break;
     }
-    if(theaterChase(white, 50, 50)){
+    if(colorWipe(red, 10)){
+      break;
+    }
+    if(theaterChase(red, 50, 50)){
+      break;
+    }
+    if(colorWipe(purple, 10)){
+      break;
+    }
+    if(colorWipe(none, 10)){
+      break;
+    }
+    if(display_words(activity, blue, 150)){
       break;
     }
   }
@@ -116,15 +132,11 @@ void medi_mode(){
   some_movement();
   open_close();
 
-//  while(true){
-//    if(!respond_to_button()){
-//      theaterChase(red,50,1);
-////      rainbowPulse(20);
-//    } else {
-//      break;
-//    }
-//  }
-  
+   while(true){
+    if(theaterChaseRainbow(50)){
+      break;
+    }
+  }
 }
 
 void subtle_mode(){
@@ -172,14 +184,18 @@ void open_close(){
 }
 
 // Fill the dots one after the other with a color
-void colorWipe(uint32_t c, uint8_t wait) {
+bool colorWipe(uint32_t c, uint8_t wait) {
   for(uint16_t i=0; i<matrix.height(); i++) {
+    if(respond_to_button()){
+      return true;
+    }
     for(uint16_t j=0; j<matrix.width(); j++) {
         matrix.drawPixel(j, i, c);
         matrix.show();
         delay(wait);
     }
   }
+  return false;
 }
 
 void rainbow(uint8_t wait) {
@@ -239,8 +255,11 @@ bool theaterChase(uint32_t c, uint8_t wait, int cycles) {
 }
 
 //Theatre-style crawling lights with rainbow effect
-void theaterChaseRainbow(uint8_t wait) {
+bool theaterChaseRainbow(uint8_t wait) {
   for (int j=0; j < 256; j++) {     // cycle all 256 colors in the wheel
+    if(respond_to_button()){
+      return true;
+    }
     for (int q=0; q < 3; q++) {
       for (int x=0; x < matrix.width(); x++) {
         for (int i=0; i < matrix.height(); i=i+3) {
@@ -257,6 +276,7 @@ void theaterChaseRainbow(uint8_t wait) {
         }
     }
   }
+  return false;
 }
 
 // Input a value 0 to 255 to get a color value.
