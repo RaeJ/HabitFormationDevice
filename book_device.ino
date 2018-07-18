@@ -10,6 +10,7 @@ Servo hinge;  // create servo object to control a servo
 
 int angle = 0;
 bool open = false;
+int hingeSpeed = 0;
   
 Adafruit_NeoMatrix matrix = Adafruit_NeoMatrix(8, 8, 2, 1, PIN,
   NEO_TILE_BOTTOM   + NEO_TILE_LEFT   + NEO_TILE_ROWS   + NEO_TILE_PROGRESSIVE +
@@ -35,7 +36,7 @@ char subtle = 'S';
 char mediocre = 'M';
 char intensive = 'I';
 
-char mode = subtle;
+char mode = mediocre;
 
 //------------------------------------------------------------------------------------------------------------------------//
 
@@ -48,12 +49,15 @@ void setup() {
   switch( mode ){
     case 'I':
       matrix.setBrightness(75);
+      hingeSpeed = 15;
       break;
     case 'M':
       matrix.setBrightness(30);
+      hingeSpeed = 40;
       break;
     default: // subtle
       matrix.setBrightness(15);
+      hingeSpeed = 75;
   }
   
   pinMode(buttonPin, INPUT);  // initialize the pushbutton pin as an input
@@ -64,50 +68,81 @@ void setup() {
   Serial.begin(9600);
 }
 
+void loop() {
+  int buttonState = digitalRead(buttonPin);
+  if(buttonState == HIGH){
+    // TODO: Add a line so that if the button is pressed it just opens without fandangled things
+    switch( mode ){
+      case 'I':
+        intense_mode();
+        break;
+      case 'M':
+        medi_mode();
+        break;
+      default: // subtle
+        subtle_mode();
+    }
+  }
+  
+}
+
+
+void intense_mode(){
+  if(!open){
+    intense_movement();
+  }
+  open_close();
+}
+
+void medi_mode(){
+  if(!open){
+    some_movement();
+  }
+  open_close();
+}
+
+void subtle_mode(){
+  open_close();
+}
+
+void some_movement(){
+  for (int pos = 0; pos <= 60 ; pos += 1) {
+    hinge.write(pos);
+    delay(hingeSpeed); 
+  }
+  hinge.write(0);
+  delay(500);
+}
+
+void intense_movement(){
+  for(int i=0; i<3; i++){
+    hinge.write(30);
+    delay(300);
+    hinge.write(0);
+    delay(300);
+  }
+  delay(200);
+}
+
 void open_close(){
   while(digitalRead(buttonPin) == HIGH){
     //Do nothing
   }
   if(open){
+    for (int pos = angle; pos >= 0 ; pos -= 1) {
+      hinge.write(pos);
+      delay(hingeSpeed); 
+    }
     angle = 0;
     open = false;
   } else {
+    for (int pos = angle; pos <= 100 ; pos += 1) {
+      hinge.write(pos);
+      delay(hingeSpeed); 
+    }
     angle = 100;
     open = true;
   }
-
-  hinge.write(angle);
-}
-
-void loop() {
-  int buttonState = digitalRead(buttonPin);
-  if(buttonState == HIGH){
-    open_close();
-  }
-  
-//  switch( mode ){
-//    case 'I':
-//      intense_mode();
-//      break;
-//    case 'M':
-//      medi_mode();
-//      break;
-//    default: // subtle
-//      subtle_mode();
-//  }
-}
-
-
-void intense_mode(){
-  
-}
-
-void medi_mode(){
-  
-}
-
-void subtle_mode(){
-
 }
 
 // Fill the dots one after the other with a color
