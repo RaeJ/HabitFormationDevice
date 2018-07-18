@@ -1,8 +1,15 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_NeoMatrix.h>
 #include <Adafruit_NeoPixel.h>
+#include <Servo.h>
  
 #define PIN 14
+const int buttonPin = 2;     // the number of the pushbutton pin
+
+Servo hinge;  // create servo object to control a servo
+
+int angle = 0;
+bool open = false;
   
 Adafruit_NeoMatrix matrix = Adafruit_NeoMatrix(8, 8, 2, 1, PIN,
   NEO_TILE_BOTTOM   + NEO_TILE_LEFT   + NEO_TILE_ROWS   + NEO_TILE_PROGRESSIVE +
@@ -49,77 +56,58 @@ void setup() {
       matrix.setBrightness(15);
   }
   
+  pinMode(buttonPin, INPUT);  // initialize the pushbutton pin as an input
+  hinge.attach(5);  // attaches the servo on pin 12 to the servo object
+  hinge.write(angle);
   matrix.begin();
   matrix.setTextWrap(false);
+  Serial.begin(9600);
+}
+
+void open_close(){
+  while(digitalRead(buttonPin) == HIGH){
+    //Do nothing
+  }
+  if(open){
+    angle = 0;
+    open = false;
+  } else {
+    angle = 100;
+    open = true;
+  }
+
+  hinge.write(angle);
 }
 
 void loop() {
-  switch( mode ){
-    case 'I':
-      intense_mode();
-      break;
-    case 'M':
-      medi_mode();
-      break;
-    default: // subtle
-      subtle_mode();
+  int buttonState = digitalRead(buttonPin);
+  if(buttonState == HIGH){
+    open_close();
   }
+  
+//  switch( mode ){
+//    case 'I':
+//      intense_mode();
+//      break;
+//    case 'M':
+//      medi_mode();
+//      break;
+//    default: // subtle
+//      subtle_mode();
+//  }
 }
 
 
 void intense_mode(){
-  colorWipe(red, 10);
-  colorWipe(none, 10);
-
-  theaterChase(white, 50, 40);
-
-  colorWipe(white, 10);
-  colorWipe(none, 10);
-
-  theaterChaseRainbow(50);
-
-  colorWipe(red, 10);
-  colorWipe(none, 10);
-
-  display_words( activity, purple, 150 );
+  
 }
 
 void medi_mode(){
-  colorWipe(purple, 20);
-  colorWipe(none, 20);
-
-  theaterChase(blue, 75, 40);
-
-  colorWipe(turquiose, 20);
-  colorWipe(none, 20);
-
-  rainbow(10);
-
-  colorWipe(purple, 20);
-  colorWipe(none, 20);
-
-  theaterChase(red, 75, 40);
-
-  colorWipe(turquiose, 20);
-  colorWipe(none, 20);
   
-  display_words( activity, purple, 150 );
 }
 
 void subtle_mode(){
-  colorWipe(blue, 30);
-  colorWipe(none, 30);
 
-  for(int i = 0; i<10; i++){
-    rainbow(20);
-  }
-  
-  colorWipe(purple, 30);
-  colorWipe(none, 30);
-
-  for(int i = 0; i<20; i++){
-    rainbowPulse(10);
-  }
 }
 
 // Fill the dots one after the other with a color
