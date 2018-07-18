@@ -36,7 +36,7 @@ char subtle = 'S';
 char mediocre = 'M';
 char intensive = 'I';
 
-char mode = mediocre;
+char mode = intensive;
 
 //------------------------------------------------------------------------------------------------------------------------//
 
@@ -70,8 +70,9 @@ void setup() {
 
 void loop() {
   int buttonState = digitalRead(buttonPin);
-  if(buttonState == HIGH){
+  if(buttonState == HIGH && !open){
     // TODO: Add a line so that if the button is pressed it just opens without fandangled things
+    Serial.println("Button pressed");
     switch( mode ){
       case 'I':
         intense_mode();
@@ -82,23 +83,48 @@ void loop() {
       default: // subtle
         subtle_mode();
     }
+  } else if(buttonState == HIGH){
+    open_close();
   }
   
 }
 
+bool respond_to_button(){
+  if (digitalRead(buttonPin) == HIGH){
+    colorWipe(blue, 10);
+    colorWipe(none, 10);
+    open_close();
+    return true;
+  }
+  return false;
+}
 
 void intense_mode(){
-  if(!open){
-    intense_movement();
-  }
+  intense_movement();
   open_close();
+  while(true){
+    if(display_words(activity, blue, 150)){
+      break;
+    }
+    if(theaterChase(white, 50, 50)){
+      break;
+    }
+  }
 }
 
 void medi_mode(){
-  if(!open){
-    some_movement();
-  }
+  some_movement();
   open_close();
+
+//  while(true){
+//    if(!respond_to_button()){
+//      theaterChase(red,50,1);
+////      rainbowPulse(20);
+//    } else {
+//      break;
+//    }
+//  }
+  
 }
 
 void subtle_mode(){
@@ -185,8 +211,11 @@ void rainbowPulse(uint8_t wait) {
 }
 
 //Theatre-style crawling lights.
-void theaterChase(uint32_t c, uint8_t wait, int cycles) {
+bool theaterChase(uint32_t c, uint8_t wait, int cycles) {
   for (int j=0; j<cycles; j++) {  //do 10 cycles of chasing
+    if(respond_to_button()){
+      return true;
+    }
     for (int q=0; q < 3; q++) {
       for (int x=0; x < matrix.height(); x++) {
         for (int i=0; i < matrix.width(); i=i+3) {
@@ -206,6 +235,7 @@ void theaterChase(uint32_t c, uint8_t wait, int cycles) {
       }
     }
   }
+  return false;
 }
 
 //Theatre-style crawling lights with rainbow effect
@@ -244,7 +274,7 @@ uint32_t Wheel(byte WheelPos) {
   }
 }
 
-void display_words( char* message, uint32_t c, uint8_t wait ){
+bool display_words( char* message, uint32_t c, uint8_t wait ){
     matrix.setTextColor(c);
   
     char str[50];
@@ -252,6 +282,9 @@ void display_words( char* message, uint32_t c, uint8_t wait ){
     int len = strlen(str);
     
   for(int x = matrix.width(); x > -(len*6 + 10); x--){
+    if(respond_to_button()){
+      return true;
+    }
     matrix.fillScreen(0);
     matrix.setCursor(x, 0);
     
@@ -264,7 +297,7 @@ void display_words( char* message, uint32_t c, uint8_t wait ){
     matrix.show();
     delay( wait );
   }
-  
+  return false;
 }
 
 
