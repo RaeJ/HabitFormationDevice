@@ -36,7 +36,7 @@ char subtle = 'S';
 char mediocre = 'M';
 char intensive = 'I';
 
-char mode = mediocre;
+char mode = subtle;
 
 //------------------------------------------------------------------------------------------------------------------------//
 
@@ -141,6 +141,12 @@ void medi_mode(){
 
 void subtle_mode(){
   open_close();
+
+  while(true){
+    if(rainbowPulse(500, 5)){
+      break;
+    }
+  }
 }
 
 void some_movement(){
@@ -212,10 +218,13 @@ void rainbow(uint8_t wait) {
   }
 }
 
-void rainbowPulse(uint8_t wait) {
+bool rainbowPulse(uint8_t wait, int cycles) {
   uint16_t i, j, x;
 
-  for(j=0; j<256*5; j++) { // 5 cycles of all colors on wheel
+  for(j=0; j<256*cycles; j++) {
+    if(respond_to_button()){
+      return true;
+    }
     for(i=0; i< matrix.height(); i++) {
       for(x=0; x < matrix.width(); x++){
         matrix.drawPixel(x, i, Wheel(((i * x * 256 / ( matrix.height() * matrix.width() )) + j) & 255));
@@ -224,6 +233,7 @@ void rainbowPulse(uint8_t wait) {
     matrix.show();
     delay(wait);
   }
+  return false;
 }
 
 //Theatre-style crawling lights.
