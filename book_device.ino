@@ -27,7 +27,7 @@ const uint16_t blue = matrix.Color(0, 0, 255);
 const uint16_t white = matrix.Color(255, 255, 255);
 const uint16_t yellow = matrix.Color(255, 255, 0);
 const uint16_t purple = matrix.Color(255, 0, 255);
-const uint16_t turquiose = matrix.Color(0, 255, 255);
+const uint16_t turq = matrix.Color(0, 255, 255);
 
 //------------------------------------------------------------------------------------------------------------------------//
 
@@ -36,7 +36,7 @@ char subtle = 'S';
 char mediocre = 'M';
 char intensive = 'I';
 
-char mode = subtle;
+char mode = mediocre;
 
 //------------------------------------------------------------------------------------------------------------------------//
 
@@ -66,6 +66,7 @@ void setup() {
   matrix.begin();
   matrix.setTextWrap(false);
   Serial.begin(9600);
+  colorWipe(none, 30);
 }
 
 void loop() {
@@ -125,6 +126,18 @@ void intense_mode(){
     if(display_words(activity, blue, 150)){
       break;
     }
+    if(colorWipe(matrix.Color(93, 37, 166), 10)){
+      break;
+    }
+    if(colorWipe(none, 10)){
+      break;
+    }
+    if(theaterChaseRainbow(50)){
+      break;
+    }
+    if(colorWipe(white, 10)){
+      break;
+    }
   }
 }
 
@@ -133,7 +146,34 @@ void medi_mode(){
   open_close();
 
    while(true){
-    if(theaterChaseRainbow(50)){
+    if(colorWipe(green, 30)){
+      break;
+    }
+    if(theaterChase(green, 90, 30)){
+      break;
+    }
+    if(colorWipe(blue, 30)){
+      break;
+    }
+    if(theaterChase(blue, 70, 40)){
+      break;
+    }
+    if(colorWipe(matrix.Color(111, 0, 255), 30)){
+      break;
+    }
+    if(colorWipe(none, 30)){
+      break;
+    }
+    if(display_words(activity, matrix.Color(111, 0, 255), 150)){
+      break;
+    }
+    if(colorWipe(matrix.Color(146, 146, 30), 30)){
+      break;
+    }
+    if(colorWipe(yellow, 30)){
+      break;
+    }
+    if(colorWipe(matrix.Color(171, 255, 0), 30)){
       break;
     }
   }
@@ -143,9 +183,31 @@ void subtle_mode(){
   open_close();
 
   while(true){
-    if(rainbowPulse(500, 5)){
+    if(colorWipe(turq, 30)){
       break;
     }
+    if(colorWipe(blue, 30)){
+      break;
+    }
+    if(colorWipe(matrix.Color(111, 0, 255), 30)){
+      break;
+    }
+    if(colorWipe(matrix.Color(93, 37, 166), 30)){
+      break;
+    }
+    if(colorWipe(matrix.Color(188, 0, 255), 30)){
+      break;
+    }
+    if(colorWipe(purple, 30)){
+      break;
+    }
+    if(colorWipe(matrix.Color(255, 164, 255), 30)){
+      break;
+    }
+    if(colorWipe(white, 30)){
+      break;
+    }
+    
   }
 }
 
