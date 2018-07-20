@@ -13,6 +13,8 @@ Servo hinge;  // create servo object to control a servo
 
 int angle = 0;
 bool open = false;
+bool soundPlayed = false;
+bool finishedPlaying = false;
 int hingeSpeed = 0;
   
 Adafruit_NeoMatrix matrix = Adafruit_NeoMatrix(8, 8, 2, 1, PIN,
@@ -86,6 +88,7 @@ void setup() {
 void loop() {
   int buttonState = digitalRead(buttonPin);
   if(buttonState == HIGH && !open){
+    wait_for_release();
     // TODO: Add a line so that if the button is pressed it just opens without fandangled things
     switch( mode ){
       case 'I':
@@ -95,21 +98,25 @@ void loop() {
         medi_mode();
         break;
       default: // subtle
-        wav_startPlayingFile("/ZapFX001.wav");
-//        subtle_mode();
+        subtle_mode();
     }
   } else if(buttonState == HIGH){
+    wait_for_release();
     open_close();
   }
-  wav_loop();
   
+  
+}
+
+void wait_for_release(){
+  while(digitalRead(buttonPin) == HIGH){
+      //Do nowt
+    }
 }
 
 bool respond_to_button(){
   if (digitalRead(buttonPin) == HIGH){
-    while(digitalRead(buttonPin) == HIGH){
-      //Do nowt
-    }
+    wait_for_release();
     colorWipe(blue, 10);
     colorWipe(none, 10);
     open_close();
@@ -198,6 +205,16 @@ void subtle_mode(){
   open_close();
 
   while(true){
+    while(!finishedPlaying){
+      if(!soundPlayed){
+        wav_startPlayingFile("/ZapFX001.wav");
+        soundPlayed = true;  
+      }
+      wav_loop();
+    }
+    soundPlayed = false;
+    finishedPlaying = false;
+    
     if(colorWipe(turq, 30)){
       break;
     }
@@ -436,6 +453,7 @@ void wav_stopPlaying()
   i2s_end();
   I2S_WAV.playing = false;
   wavClose(&I2S_WAV.wf);
+  finishedPlaying = true;
 }
 
 bool wav_playing()
