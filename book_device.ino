@@ -41,7 +41,7 @@ char subtle = 'S';
 char mediocre = 'M';
 char intensive = 'I';
 
-char mode = subtle;
+char mode = intensive;
 
 //------------------------------------------------------------------------------------------------------------------------//
 
@@ -130,12 +130,20 @@ void intense_mode(){
   open_close();
   
   while(true){
-    if(theaterChase(white, 50, 50)){
-      break;
-    }
     if(colorWipe(red, 10)){
       break;
     }
+    
+    while(!finishedPlaying){
+      if(!soundPlayed){
+        wav_startPlayingFile("/ZapFX001.wav");
+        soundPlayed = true;  
+      }
+      wav_loop();
+    }
+    soundPlayed = false;
+    finishedPlaying = false;
+    
     if(theaterChase(red, 50, 50)){
       break;
     }
@@ -160,12 +168,25 @@ void intense_mode(){
     if(colorWipe(white, 10)){
       break;
     }
+    if(theaterChase(white, 50, 50)){
+      break;
+    }
   }
 }
 
 void medi_mode(){
   some_movement();
   open_close();
+
+  while(!finishedPlaying){
+      if(!soundPlayed){
+        wav_startPlayingFile("/ZapFX001.wav");
+        soundPlayed = true;  
+      }
+      wav_loop();
+    }
+    soundPlayed = false;
+    finishedPlaying = false;
 
    while(true){
     if(colorWipe(green, 30)){
@@ -205,15 +226,6 @@ void subtle_mode(){
   open_close();
 
   while(true){
-    while(!finishedPlaying){
-      if(!soundPlayed){
-        wav_startPlayingFile("/ZapFX001.wav");
-        soundPlayed = true;  
-      }
-      wav_loop();
-    }
-    soundPlayed = false;
-    finishedPlaying = false;
     
     if(colorWipe(turq, 30)){
       break;
