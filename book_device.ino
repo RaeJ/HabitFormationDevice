@@ -102,7 +102,7 @@ void loop() {
     }
   } else if(buttonState == HIGH){
     wait_for_release();
-    open_close();
+    close_book();
   }
   
   
@@ -119,7 +119,7 @@ bool respond_to_button(){
     wait_for_release();
     colorWipe(blue, 10);
     colorWipe(none, 10);
-    open_close();
+    close_book();
     return true;
   }
   return false;
@@ -127,7 +127,7 @@ bool respond_to_button(){
 
 void intense_mode(){
   intense_movement();
-  open_close();
+  open_book();
   
   while(true){
     if(colorWipe(red, 10)){
@@ -176,7 +176,7 @@ void intense_mode(){
 
 void medi_mode(){
   some_movement();
-  open_close();
+  open_book();
 
   while(!finishedPlaying){
       if(!soundPlayed){
@@ -223,7 +223,7 @@ void medi_mode(){
 }
 
 void subtle_mode(){
-  open_close();
+  open_book();
 
   while(true){
     
@@ -274,25 +274,24 @@ void intense_movement(){
   delay(200);
 }
 
-void open_close(){
-  while(digitalRead(buttonPin) == HIGH){
-    //Do nothing
+void open_book(){
+  wait_for_release();
+  for (int pos = angle; pos <= 100 ; pos += 1) {
+    hinge.write(pos);
+    delay(hingeSpeed); 
   }
-  if(open){
-    for (int pos = angle; pos >= 0 ; pos -= 1) {
-      hinge.write(pos);
-      delay(hingeSpeed); 
-    }
-    angle = 0;
-    open = false;
-  } else {
-    for (int pos = angle; pos <= 100 ; pos += 1) {
-      hinge.write(pos);
-      delay(hingeSpeed); 
-    }
-    angle = 100;
-    open = true;
+  angle = 100;
+  open = true;
+}
+
+void close_book(){
+  wait_for_release();
+  for (int pos = angle; pos >= 0 ; pos -= 1) {
+    hinge.write(pos);
+    delay(hingeSpeed); 
   }
+  angle = 0;
+  open = false;
 }
 
 //------------------------------------------------------------------------------------------------------------------------//
