@@ -41,7 +41,7 @@ char subtle = 'S';
 char mediocre = 'M';
 char intensive = 'I';
 
-char mode = intensive;
+char mode = mediocre;
 
 //------------------------------------------------------------------------------------------------------------------------//
 
@@ -126,6 +126,7 @@ bool respond_to_button(){
 }
 
 void intense_mode(){
+  bool buttonPressed = false;
   intense_movement();
   open_book();
   
@@ -139,11 +140,16 @@ void intense_mode(){
         wav_startPlayingFile("/ZapFX001.wav");
         soundPlayed = true;  
       }
-      wav_loop();
+      if(wav_loop()){
+        buttonPressed = true;
+      }
     }
     soundPlayed = false;
     finishedPlaying = false;
     
+    if(buttonPressed){
+      break;
+    }
     if(theaterChase(red, 50, 50)){
       break;
     }
@@ -175,6 +181,7 @@ void intense_mode(){
 }
 
 void medi_mode(){
+  bool buttonPressed = false;
   some_movement();
   open_book();
 
@@ -183,12 +190,14 @@ void medi_mode(){
         wav_startPlayingFile("/ZapFX001.wav");
         soundPlayed = true;  
       }
-      wav_loop();
+      if(wav_loop()){
+        buttonPressed = true;
+      }
     }
     soundPlayed = false;
     finishedPlaying = false;
 
-   while(true){
+   while(!buttonPressed){
     if(colorWipe(green, 30)){
       break;
     }
@@ -480,22 +489,17 @@ void wav_setup()
   I2S_WAV.playing = false;
 }
 
-void wav_loop()
+bool wav_loop()
 {
-  bool buttonPressed = false;
   bool i2s_full = false;
   int rc;
   while (I2S_WAV.playing && !i2s_full) {
-    if(buttonPressed){
-      break;
+    if(respond_to_button()){
+      Serial.println(F("Stop playing"));
+      wav_stopPlaying();
+      return true;
     }
     while (I2S_WAV.buffer_index < I2S_WAV.bufferlen) {
-      if(respond_to_button()){
-        Serial.println(F("Stop playing"));
-        wav_stopPlaying();
-        buttonPressed = true;
-        break;
-      }
       
       int16_t pcm = I2S_WAV.buffer[I2S_WAV.buffer_index];
       if (i2s_write_lr_nb(pcm, pcm)) {
@@ -525,6 +529,7 @@ void wav_loop()
       break;
     }
   }
+  return false;
 }
 
 void wav_startPlayingFile(const char *wavfilename)
