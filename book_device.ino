@@ -2,9 +2,12 @@
 #include <Adafruit_NeoMatrix.h>
 #include <Adafruit_NeoPixel.h>
 #include <Servo.h>
+
+#include <i2s.h>
+#include "wavspiffs.h"
  
 #define PIN 14
-const int buttonPin = 2;     // the number of the pushbutton pin
+const int buttonPin = 16;     // the number of the pushbutton pin
 
 Servo hinge;  // create servo object to control a servo
 
@@ -36,7 +39,7 @@ char subtle = 'S';
 char mediocre = 'M';
 char intensive = 'I';
 
-char mode = mediocre;
+char mode = subtle;
 
 //------------------------------------------------------------------------------------------------------------------------//
 
@@ -60,20 +63,30 @@ void setup() {
       hingeSpeed = 75;
   }
   
-  pinMode(buttonPin, INPUT);  // initialize the pushbutton pin as an input
   hinge.attach(5);  // attaches the servo on pin 12 to the servo object
   hinge.write(angle);
   matrix.begin();
   matrix.setTextWrap(false);
-  Serial.begin(9600);
   colorWipe(none, 30);
+
+  pinMode(buttonPin, INPUT);
+  Serial.begin(115200); Serial.println();
+  Serial.println(F("\nESP8266 Sound Effects Web Trigger"));
+
+  if (!SPIFFS.begin()) {
+    Serial.println("SPIFFS.begin() failed");
+    return;
+  }
+  // Confirm track files are present in SPIFFS
+  showDir();
+
+  wav_setup();
 }
 
 void loop() {
   int buttonState = digitalRead(buttonPin);
   if(buttonState == HIGH && !open){
     // TODO: Add a line so that if the button is pressed it just opens without fandangled things
-    Serial.println("Button pressed");
     switch( mode ){
       case 'I':
         intense_mode();
@@ -82,11 +95,13 @@ void loop() {
         medi_mode();
         break;
       default: // subtle
-        subtle_mode();
+        wav_startPlayingFile("/ZapFX001.wav");
+//        subtle_mode();
     }
   } else if(buttonState == HIGH){
     open_close();
   }
+  wav_loop();
   
 }
 
@@ -251,6 +266,10 @@ void open_close(){
   }
 }
 
+//------------------------------------------------------------------------------------------------------------------------//
+
+//Neopixel Matrix Functions
+
 // Fill the dots one after the other with a color
 bool colorWipe(uint32_t c, uint8_t wait) {
   for(uint16_t i=0; i<matrix.height(); i++) {
@@ -390,6 +409,134 @@ bool display_words( char* message, uint32_t c, uint8_t wait ){
     delay( wait );
   }
   return false;
+}
+
+//------------------------------------------------------------------------------------------------------------------------//
+
+//Sound Functions
+
+// Non-blocking I2S write for left and right 16-bit PCM
+bool ICACHE_FLASH_ATTR i2s_write_lr_nb(int16_t left, int16_t right){
+  int sample = right & 0xFFFF;
+  sample = sample << 16;
+  sample |= left & 0xFFFF;
+  return i2s_write_sample_nb(sample);
+}
+
+struct I2S_status_s {
+  wavFILE_t wf;
+  int16_t buffer[512];
+  int bufferlen;
+  int buffer_index;
+  int playing;
+} I2S_WAV;
+
+void wav_stopPlaying()
+{
+  i2s_end();
+  I2S_WAV.playing = false;
+  wavClose(&I2S_WAV.wf);
+}
+
+bool wav_playing()
+{
+  return I2S_WAV.playing;
+}
+
+void wav_setup()
+{
+  Serial.println(F("wav_setup"));
+  I2S_WAV.bufferlen = -1;
+  I2S_WAV.buffer_index = 0;
+  I2S_WAV.playing = false;
+}
+
+void wav_loop()
+{
+  bool i2s_full = false;
+  int rc;
+  while (I2S_WAV.playing && !i2s_full) {
+    while (I2S_WAV.buffer_index < I2S_WAV.bufferlen) {
+      
+      int16_t pcm = I2S_WAV.buffer[I2S_WAV.buffer_index];
+      if (i2s_write_lr_nb(pcm, pcm)) {
+        I2S_WAV.buffer_index++;
+      }
+      else {
+       
+        i2s_full = true;
+        break;
+      }
+      if ((I2S_WAV.buffer_index & 0x3F) == 0){
+        Serial.println("Yielding");
+        yield();
+      }
+    }
+    if (i2s_full) break;
+
+    rc = wavRead(&I2S_WAV.wf, I2S_WAV.buffer, sizeof(I2S_WAV.buffer));
+    if (rc > 0) {
+      //Serial.printf("wavRead %d\r\n", rc);
+      I2S_WAV.bufferlen = rc / sizeof(I2S_WAV.buffer[0]);
+      I2S_WAV.buffer_index = 0;
+    }
+    else {
+      Serial.println(F("Stop playing"));
+      wav_stopPlaying();
+      break;
+    }
+  }
+}
+
+void wav_startPlayingFile(const char *wavfilename)
+{
+  wavProperties_t wProps;
+  int rc;
+
+  Serial.printf("wav_startPlayingFile(%s)\r\n", wavfilename);
+  i2s_begin();
+  rc = wavOpen(wavfilename, &I2S_WAV.wf, &wProps);
+  Serial.printf("wavOpen %d\r\n", rc);
+  if (rc != 0) {
+    Serial.println("wavOpen failed");
+    return;
+  }
+  Serial.printf("audioFormat %d\r\n", wProps.audioFormat);
+  Serial.printf("numChannels %d\r\n", wProps.numChannels);
+  Serial.printf("sampleRate %d\r\n", wProps.sampleRate);
+  Serial.printf("byteRate %d\r\n", wProps.byteRate);
+  Serial.printf("blockAlign %d\r\n", wProps.blockAlign);
+  Serial.printf("bitsPerSample %d\r\n", wProps.bitsPerSample);
+
+  i2s_set_rate(wProps.sampleRate);
+
+  I2S_WAV.bufferlen = -1;
+  I2S_WAV.buffer_index = 0;
+  I2S_WAV.playing = true;
+  wav_loop();
+}
+
+void showDir(void)
+{
+  wavFILE_t wFile;
+  wavProperties_t wProps;
+  int rc;
+
+  Dir dir = SPIFFS.openDir("/");
+  while (dir.next()) {
+    Serial.println(dir.fileName());
+    rc = wavOpen(dir.fileName().c_str(), &wFile, &wProps);
+    if (rc == 0) {
+      Serial.printf("  audioFormat %d\r\n", wProps.audioFormat);
+      Serial.printf("  numChannels %d\r\n", wProps.numChannels);
+      Serial.printf("  sampleRate %d\r\n", wProps.sampleRate);
+      Serial.printf("  byteRate %d\r\n", wProps.byteRate);
+      Serial.printf("  blockAlign %d\r\n", wProps.blockAlign);
+      Serial.printf("  bitsPerSample %d\r\n", wProps.bitsPerSample);
+      Serial.println();
+      wavClose(&wFile);
+    }
+  }
 }
 
 
