@@ -483,10 +483,20 @@ void wav_setup()
 
 void wav_loop()
 {
+  bool buttonPressed = false;
   bool i2s_full = false;
   int rc;
   while (I2S_WAV.playing && !i2s_full) {
+    if(buttonPressed){
+      break;
+    }
     while (I2S_WAV.buffer_index < I2S_WAV.bufferlen) {
+      if(respond_to_button()){
+        Serial.println(F("Stop playing"));
+        wav_stopPlaying();
+        buttonPressed = true;
+        break;
+      }
       
       int16_t pcm = I2S_WAV.buffer[I2S_WAV.buffer_index];
       if (i2s_write_lr_nb(pcm, pcm)) {
