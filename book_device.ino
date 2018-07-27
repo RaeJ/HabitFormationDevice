@@ -130,6 +130,7 @@ void setup() {
 }
 
 void loop() {
+  colorWipe(none, 10);
   int buttonState = digitalRead(buttonPin);
   if(buttonState == HIGH && !opened){
     wait_for_release();
@@ -164,7 +165,7 @@ void intense_mode(){
   intense_movement();
   open_book();
   
-  while(true){
+  while(opened){
     if(colorWipe(red, 10)){
       break;
     }
@@ -231,7 +232,7 @@ void medi_mode(){
     soundPlayed = false;
     finishedPlaying = false;
 
-   while(!buttonPressed){
+   while(!buttonPressed && opened){
     if(colorWipe(green, 30)){
       break;
     }
@@ -268,7 +269,7 @@ void medi_mode(){
 void subtle_mode(){
   open_book();
 
-  while(true){
+  while(opened){
     
     if(colorWipe(turq, 30)){
       break;
@@ -321,12 +322,12 @@ void open_book(){
   wait_for_release();
   for (int pos = angle; pos <= 100 ; pos += 1) {
     hinge.write(pos);
-    delay(hingeSpeed);
-//    respondToData(); 
+    delay(hingeSpeed); 
   }
   angle = 100;
   opened = true;
   onMsg();
+  respondToData();
 }
 
 void close_book(){
@@ -334,11 +335,12 @@ void close_book(){
   for (int pos = angle; pos >= 0 ; pos -= 1) {
     hinge.write(pos);
     delay(hingeSpeed);
-//    respondToData(); 
   }
   angle = 0;
   opened = false;
   offMsg();
+  respondToData(); 
+  delay(5000);
 }
 
 //------------------------------------------------------------------------------------------------------------------------//
@@ -719,7 +721,7 @@ void respondToData(){
 bool colorWipe(uint32_t c, uint8_t wait) {
   for(uint16_t i=0; i<matrix.height(); i++) {
     respondToData();
-    if(respond_to_button()){
+    if(respond_to_button() || !opened){
       return true;
     }
     for(uint16_t j=0; j<matrix.width(); j++) {
