@@ -10,12 +10,14 @@
 #include <i2s.h>
 #include "wavspiffs.h"
 
+void respondToData();
 void prepareIds();
 boolean connectWifi();
 boolean connectUDP();
 void startHttpServer();
 void turnOnDevice();
 void turnOffDevice();
+void sendDeviceState();
 
 const char* ssid = "NameOfNetwork";  // CHANGE: Wifi name
 const char* password = "AardvarkBadgerHedgehog";  // CHANGE: Wifi password 
@@ -38,7 +40,7 @@ String persistent_uuid;
 boolean cannotConnectToWifi = false;
 
 int angle = 0;
-bool open = false;
+bool opened = false;
 bool soundPlayed = false;
 bool finishedPlaying = false;
 int hingeSpeed = 0;
@@ -129,7 +131,7 @@ void setup() {
 
 void loop() {
   int buttonState = digitalRead(buttonPin);
-  if(buttonState == HIGH && !open){
+  if(buttonState == HIGH && !opened){
     wait_for_release();
     open_book();
   } else if(buttonState == HIGH){
@@ -137,60 +139,7 @@ void loop() {
     close_book();
   }
 
-  HTTP.handleClient();
-  delay(1);
-  
-  
-  // if there's data available, read a packet
-  // check if the WiFi and UDP connections were successful
-  if(wifiConnected){
-    if(udpConnected){    
-      // if there’s data available, read a packet
-      int packetSize = UDP.parsePacket();
-      
-      if(packetSize) {
-        //Serial.println("");
-        //Serial.print("Received packet of size ");
-        //Serial.println(packetSize);
-        //Serial.print("From ");
-        IPAddress remote = UDP.remoteIP();
-        
-        for (int i =0; i < 4; i++) {
-          Serial.print(remote[i], DEC);
-          if (i < 3) {
-            Serial.print(".");
-          }
-        }
-        
-        Serial.print(", port ");
-        Serial.println(UDP.remotePort());
-        
-        int len = UDP.read(packetBuffer, 255);
-        
-        if (len > 0) {
-            packetBuffer[len] = 0;
-        }
-
-        String request = packetBuffer;
-        //Serial.println("Request:");
-        //Serial.println(request);
-        
-        // Issue https://github.com/kakopappa/arduino-esp8266-alexa-wemo-switch/issues/24 fix
-        if(request.indexOf("M-SEARCH") >= 0) {
-            // Issue https://github.com/kakopappa/arduino-esp8266-alexa-multiple-wemo-switch/issues/22 fix
-            //if(request.indexOf("urn:Belkin:device:**") > 0) {
-             if((request.indexOf("urn:Belkin:device:**") > 0) || (request.indexOf("ssdp:all") > 0) || (request.indexOf("upnp:rootdevice") > 0)) {
-                Serial.println("Responding to search request ...");
-                respondToSearch();
-             }
-        }
-      }
-        
-      delay(10);
-    }
-  } else {
-      Serial.println("Cannot connect to Wifi");
-  }
+  respondToData();
 }
 
 void wait_for_release(){
@@ -372,10 +321,11 @@ void open_book(){
   wait_for_release();
   for (int pos = angle; pos <= 100 ; pos += 1) {
     hinge.write(pos);
-    delay(hingeSpeed); 
+    delay(hingeSpeed);
+//    respondToData(); 
   }
   angle = 100;
-  open = true;
+  opened = true;
   onMsg();
 }
 
@@ -383,10 +333,11 @@ void close_book(){
   wait_for_release();
   for (int pos = angle; pos >= 0 ; pos -= 1) {
     hinge.write(pos);
-    delay(hingeSpeed); 
+    delay(hingeSpeed);
+//    respondToData(); 
   }
   angle = 0;
-  open = false;
+  opened = false;
   offMsg();
 }
 
@@ -464,6 +415,11 @@ void startHttpServer() {
             Serial.println("Got Turn off request");
             turnOffDevice();
         }
+      }
+
+      if(request.indexOf("GetBinaryState") >= 0) {
+        Serial.println("Got binary state request");
+        sendDeviceState();
       }
             
       HTTP.send(200, "text/plain", "");
@@ -565,6 +521,17 @@ void startHttpServer() {
         HTTP.send(200, "text/plain", "turned off");
         turnOffDevice();
        });
+ 
+      HTTP.on("/status.html", HTTP_GET, [](){
+        Serial.println("Got status request");
+ 
+        String staterespone = "0"; 
+        if (opened) {
+          staterespone = "1"; 
+        }
+        HTTP.send(200, "text/plain", staterespone);
+      
+    });
     
     HTTP.begin();  
     Serial.println("HTTP Server started ..");
@@ -639,7 +606,7 @@ void onMsg(){
 }
 
 void turnOnDevice() {
-  if(!open){
+  if(!opened){
     switch( mode ){
       case 'I':
         intense_mode();
@@ -672,6 +639,78 @@ void turnOffDevice() {
   close_book();
 }
 
+void sendDeviceState() {
+  
+  String body = 
+      "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\"><s:Body>\r\n"
+      "<u:GetBinaryStateResponse xmlns:u=\"urn:Belkin:service:basicevent:1\">\r\n"
+      "<BinaryState>";
+      
+  body += (opened ? "1" : "0");
+  
+  body += "</BinaryState>\r\n"
+      "</u:GetBinaryStateResponse>\r\n"
+      "</s:Body> </s:Envelope>\r\n";
+ 
+   HTTP.send(200, "text/xml", body.c_str());
+}
+
+void respondToData(){
+  HTTP.handleClient();
+  delay(1);
+  
+  // if there's data available, read a packet
+  // check if the WiFi and UDP connections were successful
+  if(wifiConnected){
+    if(udpConnected){    
+      // if there’s data available, read a packet
+      int packetSize = UDP.parsePacket();
+      
+      if(packetSize) {
+        //Serial.println("");
+        //Serial.print("Received packet of size ");
+        //Serial.println(packetSize);
+        //Serial.print("From ");
+        IPAddress remote = UDP.remoteIP();
+        
+        for (int i =0; i < 4; i++) {
+          Serial.print(remote[i], DEC);
+          if (i < 3) {
+            Serial.print(".");
+          }
+        }
+        
+        Serial.print(", port ");
+        Serial.println(UDP.remotePort());
+        
+        int len = UDP.read(packetBuffer, 255);
+        
+        if (len > 0) {
+            packetBuffer[len] = 0;
+        }
+
+        String request = packetBuffer;
+        //Serial.println("Request:");
+        //Serial.println(request);
+        
+        // Issue https://github.com/kakopappa/arduino-esp8266-alexa-wemo-switch/issues/24 fix
+        if(request.indexOf("M-SEARCH") >= 0) {
+            // Issue https://github.com/kakopappa/arduino-esp8266-alexa-multiple-wemo-switch/issues/22 fix
+            //if(request.indexOf("urn:Belkin:device:**") > 0) {
+             if((request.indexOf("urn:Belkin:device:**") > 0) || (request.indexOf("ssdp:all") > 0) || (request.indexOf("upnp:rootdevice") > 0)) {
+                Serial.println("Responding to search request ...");
+                respondToSearch();
+             }
+        }
+      }
+        
+      delay(10);
+    }
+  } else {
+      Serial.println("Cannot connect to Wifi");
+  }
+}
+
 //------------------------------------------------------------------------------------------------------------------------//
 
 //Neopixel Matrix Functions
@@ -679,6 +718,7 @@ void turnOffDevice() {
 // Fill the dots one after the other with a color
 bool colorWipe(uint32_t c, uint8_t wait) {
   for(uint16_t i=0; i<matrix.height(); i++) {
+    respondToData();
     if(respond_to_button()){
       return true;
     }
@@ -709,6 +749,7 @@ bool rainbowPulse(uint8_t wait, int cycles) {
   uint16_t i, j, x;
 
   for(j=0; j<256*cycles; j++) {
+    respondToData();
     if(respond_to_button()){
       return true;
     }
@@ -726,7 +767,8 @@ bool rainbowPulse(uint8_t wait, int cycles) {
 //Theatre-style crawling lights.
 bool theaterChase(uint32_t c, uint8_t wait, int cycles) {
   for (int j=0; j<cycles; j++) {  //do 10 cycles of chasing
-    if(respond_to_button()){
+    respondToData();
+    if(respond_to_button() || !opened){
       return true;
     }
     for (int q=0; q < 3; q++) {
@@ -754,7 +796,8 @@ bool theaterChase(uint32_t c, uint8_t wait, int cycles) {
 //Theatre-style crawling lights with rainbow effect
 bool theaterChaseRainbow(uint8_t wait) {
   for (int j=0; j < 256; j++) {     // cycle all 256 colors in the wheel
-    if(respond_to_button()){
+    respondToData();
+    if(respond_to_button() || !opened){
       return true;
     }
     for (int q=0; q < 3; q++) {
@@ -799,7 +842,8 @@ bool display_words( char* message, uint32_t c, uint8_t wait ){
     int len = strlen(str);
     
   for(int x = matrix.width(); x > -(len*6 + 10); x--){
-    if(respond_to_button()){
+    respondToData();
+    if(respond_to_button() || !opened){
       return true;
     }
     matrix.fillScreen(0);
@@ -863,7 +907,8 @@ bool wav_loop()
   bool i2s_full = false;
   int rc;
   while (I2S_WAV.playing && !i2s_full) {
-    if(respond_to_button()){
+    respondToData();
+    if((respond_to_button() || !opened)){
       Serial.println(F("Stop playing"));
       wav_stopPlaying();
       return true;
@@ -909,9 +954,9 @@ void wav_startPlayingFile(const char *wavfilename)
   Serial.printf("wav_startPlayingFile(%s)\r\n", wavfilename);
   i2s_begin();
   rc = wavOpen(wavfilename, &I2S_WAV.wf, &wProps);
-  Serial.printf("wavOpen %d\r\n", rc);
+  Serial.printf("wavopen %d\r\n", rc);
   if (rc != 0) {
-    Serial.println("wavOpen failed");
+    Serial.println("wavopen failed");
     return;
   }
   Serial.printf("audioFormat %d\r\n", wProps.audioFormat);
