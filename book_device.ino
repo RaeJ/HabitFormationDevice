@@ -41,7 +41,7 @@ char subtle = 'S';
 char mediocre = 'M';
 char intensive = 'I';
 
-char mode = mediocre;
+char mode = intensive;
 
 //------------------------------------------------------------------------------------------------------------------------//
 
