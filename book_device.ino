@@ -130,17 +130,21 @@ void setup() {
 }
 
 void loop() {
-  colorWipe(none, 10);
-  int buttonState = digitalRead(buttonPin);
-  if(buttonState == HIGH && !opened){
-    wait_for_release();
-    open_book();
-  } else if(buttonState == HIGH){
-    wait_for_release();
-    close_book();
-  }
+  colorWipe(none, 30);
+  simple_open_close();
 
   respondToData();
+}
+
+void simple_open_close(){
+  if(digitalRead(buttonPin) == HIGH && !opened){
+    wait_for_release();
+    open_book();
+  } else if(digitalRead(buttonPin) == HIGH){
+    wait_for_release();
+    colorWipe(none, 30);
+    close_book();
+  }
 }
 
 void wait_for_release(){
@@ -410,11 +414,13 @@ void startHttpServer() {
       if(request.indexOf("SetBinaryState") >= 0) {
         if(request.indexOf("<BinaryState>1</BinaryState>") >= 0) {
             Serial.println("Got Turn on request");
+//            colorWipe(red, 10);
             turnOnDevice();
         }
   
         if(request.indexOf("<BinaryState>0</BinaryState>") >= 0) {
             Serial.println("Got Turn off request");
+            colorWipe(none, 30);
             turnOffDevice();
         }
       }
@@ -515,12 +521,14 @@ void startHttpServer() {
     HTTP.on("/on.html", HTTP_GET, [](){
          Serial.println("Got Turn on request");
          HTTP.send(200, "text/plain", "turned on");
+//         colorWipe(green, 10);
          turnOnDevice();
        });
  
      HTTP.on("/off.html", HTTP_GET, [](){
         Serial.println("Got Turn off request");
         HTTP.send(200, "text/plain", "turned off");
+        colorWipe(none, 30);
         turnOffDevice();
        });
  
@@ -704,8 +712,10 @@ void respondToData(){
                 respondToSearch();
              }
         }
+      } else{
+        simple_open_close();
       }
-        
+      
       delay(10);
     }
   } else {
