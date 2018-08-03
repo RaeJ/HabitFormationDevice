@@ -8,6 +8,7 @@ Alexa is from [arduino-esp8266-alexa-wemo-switch](https://github.com/kakopappa/a
 ![alt text](https://github.com/RaeJ/HabitFormationDevice/blob/master/photos/open_book1.jpg "Multisensory Book")
 
 
+
 ## Internet Access
 The Raspberry Pi is simply used for internet access. In order for the device to be able to work both the ESP8266 and the Alexa need internet access. If you're using a secure network (such as eduroam) it may be difficult to connect up the devices. I'm using a Raspberry Pi 3 B+ and a USB wifi dongle. I connect the wifi dongle up to eduroam by following [these instructions](https://www.willprice.org/2014/03/17/eduroam-on-the-raspberry-pi.html) by the wonderful Will Price, simply replacing wlan0 with wlan1. I then set the wifi chip on the Raspberry Pi board up as a hotspot by following [this guide](https://www.raspberrypi.org/documentation/configuration/wireless/access-point.md).
 
