@@ -11,7 +11,7 @@ Alexa is from [arduino-esp8266-alexa-wemo-switch](https://github.com/kakopappa/a
 ## How to run the device
 ### Initial Setup
 Based off the [Arduino IDE for ESP8266](https://learn.adafruit.com/adafruit-feather-huzzah-esp8266/using-arduino-ide).
-1. Install the the [SiLabs CP2104 Driver](https://www.silabs.com/products/development-tools/software/usb-to-uart-bridge-vcp-drivers). This will allow you to upload code to the ESP8266 via a micro USB cable to the Feather HUZZAH and the other side to your computer's USB port.
+1. Install the the [SiLabs CP2104 Driver](https://www.silabs.com/products/development-tools/software/usb-to-uart-bridge-vcp-drivers). This will allow you to upload code to the ESP8266 using a micro USB cable to the Feather HUZZAH with the other side in your computer's USB port.
 2. Install the [Arduino IDE 1.6.8 or greater](https://www.arduino.cc/en/Main/Software) and open it up.
 3. Install the ESP8266 Board Package. To do this navigate to *Arduino* *Preferences* and enter `http://arduino.esp8266.com/stable/package_esp8266com_index.json` into the *Additional Board Manager URLs* field. Then navigate to the *Boards Manager* (found under *Tools*->*Board*) and install the ESP8266 Board Package. Close the Boards Manager window once the install process has completed. [This guide](https://learn.adafruit.com/add-boards-arduino-v164) is a good resource to use if you have trouble adding 3rd party boards.
 4. Restart the Arduino Editor.
