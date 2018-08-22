@@ -20,6 +20,7 @@ String friendlyName = "TheDevice";        // CHANGE: Alexa device name
 ```
 You can also change the name of the device should you so wish.
 
+
 ### Initial Arduino Editor Setup
 Based off the [Arduino IDE for ESP8266](https://learn.adafruit.com/adafruit-feather-huzzah-esp8266/using-arduino-ide) and the [file system setup](http://esp8266.github.io/Arduino/versions/2.0.0/doc/filesystem.html).
 
@@ -33,6 +34,7 @@ From here we want to install the ESP8266FS tool.
 1. Download the tool: https://github.com/esp8266/arduino-esp8266fs-plugin/releases/download/0.1.3/ESP8266FS-0.1.3.zip.
 2. In your Arduino sketchbook directory, create tools directory if it doesn't exist yet. Unpack the tool into tools directory, the path should look like `<home_dir>/Arduino/tools/ESP8266FS/tool/esp8266fs.jar`. ![alt text](https://github.com/RaeJ/HabitFormationDevice/blob/master/photos/file_layout.png "File layout")
 3. Restart the Arduino Editor. Under *Tools* there should now be an option for *ESP8266 Sketch Data Upload*.
+
 
 ### Uploading the code to the Feather HUZZAH
 1. Connect any data-capable micro USB cable to the Feather HUZZAH and the other side to your computer's USB port. ![alt text](https://github.com/RaeJ/HabitFormationDevice/blob/master/photos/huzzah_access.jpg "Accessing the Feather HUZZAH") This can be done by carefully pushing the Feather HUZZAH down so it slightly sticks out of the bottom of its encasing box (as shown in the photo).
@@ -52,6 +54,13 @@ char intensive = 'I';
 char mode = subtle;
 ```
 Simply change `char mode =` depending on what you want. Then re-upload the code to the Feather HUZZAH
+
+
+### Controlling the device with Alexa
+1. Set up your Alexa device with the Alexa App.
+2. Make sure that you are connected to the internet and the device is powered on. ![alt text](https://github.com/RaeJ/HabitFormationDevice/blob/master/photos/components.jpg "Components set up")
+3. Go into *Settings*->*Smart Home* and click *Add Device*. Alexa should discover the device under the friendly name you've chosen for it.
+4. From here you can treat the device as you would any other smart home device, you can create routines for it and turn it on and off with Alexa via voice command.
 
 
 ## Internet Access
