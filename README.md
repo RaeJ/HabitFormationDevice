@@ -51,7 +51,7 @@ char intensive = 'I';
 
 char mode = subtle;
 ```
-Simply change `mode =` depending on what you want. Then re-upload the code to the Feather HUZZAH
+Simply change `char mode =` depending on what you want. Then re-upload the code to the Feather HUZZAH
 
 
 ## Internet Access
