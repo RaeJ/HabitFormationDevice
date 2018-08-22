@@ -8,8 +8,19 @@ Alexa is from [arduino-esp8266-alexa-wemo-switch](https://github.com/kakopappa/a
 ![alt text](https://github.com/RaeJ/HabitFormationDevice/blob/master/photos/open_book1.jpg "Multisensory Book")
 
 
+
 ## How to run the device
-### Initial Setup
+### Initial Code Setup
+1. Download the repository. Some of the files relate to how to make the physical device. The files you need to make sure you have for the code are "book_device.ino", "wavspiffs.cpp", "wavspiffs.h" and "data". "data" contains the .wav file that the device plays and the "wavspiffs" files are from [bbx10](https://github.com/bbx10/SFX-I2S-web-trigger). The main file we are concerned with is "book_device.ino".
+2. Change the network name and password. These can be found as follows in the code. If using eduroam take a look at the section of the readme on **Internet Access**.
+```
+const char* ssid = "NameOfNetwork";  // CHANGE: Wifi name
+const char* password = "AardvarkBadgerHedgehog";  // CHANGE: Wifi password 
+String friendlyName = "TheDevice";        // CHANGE: Alexa device name
+```
+You can also change the name of the device should you so wish.
+
+### Initial Arduino Editor Setup
 Based off the [Arduino IDE for ESP8266](https://learn.adafruit.com/adafruit-feather-huzzah-esp8266/using-arduino-ide) and the [file system setup](http://esp8266.github.io/Arduino/versions/2.0.0/doc/filesystem.html).
 
 1. Install the the [SiLabs CP2104 Driver](https://www.silabs.com/products/development-tools/software/usb-to-uart-bridge-vcp-drivers). This will allow you to upload code to the ESP8266 using a micro USB cable to the Feather HUZZAH with the other side in your computer's USB port.
@@ -22,6 +33,8 @@ From here we want to install the ESP8266FS tool.
 1. Download the tool: https://github.com/esp8266/arduino-esp8266fs-plugin/releases/download/0.1.3/ESP8266FS-0.1.3.zip.
 2. In your Arduino sketchbook directory, create tools directory if it doesn't exist yet. Unpack the tool into tools directory, the path should look like `<home_dir>/Arduino/tools/ESP8266FS/tool/esp8266fs.jar`. ![alt text](https://github.com/RaeJ/HabitFormationDevice/blob/master/photos/file_layout.png "File layout")
 3. Restart the Arduino Editor. Under *Tools* there should now be an option for *ESP8266 Sketch Data Upload*.
+
+
 
 ## Internet Access
 The Raspberry Pi is simply used for internet access. In order for the device to be able to work both the ESP8266 and the Alexa need internet access. If you're using a secure network (such as eduroam) it may be difficult to connect up the devices. I'm using a Raspberry Pi 3 B+ and a USB wifi dongle. I connect the wifi dongle up to eduroam by following [these instructions](https://www.willprice.org/2014/03/17/eduroam-on-the-raspberry-pi.html) by the wonderful Will Price, simply replacing wlan0 with wlan1. I then set the wifi chip on the Raspberry Pi board up as a hotspot by following [this guide](https://www.raspberrypi.org/documentation/configuration/wireless/access-point.md). From here you can connect to the hotspot which should then give you access to eduroam and the internet.
