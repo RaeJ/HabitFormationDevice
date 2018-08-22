@@ -34,6 +34,24 @@ From here we want to install the ESP8266FS tool.
 2. In your Arduino sketchbook directory, create tools directory if it doesn't exist yet. Unpack the tool into tools directory, the path should look like `<home_dir>/Arduino/tools/ESP8266FS/tool/esp8266fs.jar`. ![alt text](https://github.com/RaeJ/HabitFormationDevice/blob/master/photos/file_layout.png "File layout")
 3. Restart the Arduino Editor. Under *Tools* there should now be an option for *ESP8266 Sketch Data Upload*.
 
+### Uploading the code to the Feather HUZZAH
+1. Connect any data-capable micro USB cable to the Feather HUZZAH and the other side to your computer's USB port. ![alt text](https://github.com/RaeJ/HabitFormationDevice/blob/master/photos/huzzah_access.jpg "Accessing the Feather HUZZAH") This can be done by carefully pushing the Feather HUZZAH down so it slightly sticks out of the bottom of its encasing box (as shown in the photo).
+2. Make sure that the Arduino Editor is set to the correct port (*Tools*->*Port*).
+3. If you have changed the .wav file in "data", or it is your first time uploading the file to the Feather Huzzah, click on *ESP8266 Sketch Data Upload* in *Tools* and wait for it to upload.
+4. When that is finished click the upload button in the Arduino Editor to upload the code to the Feather Huzzah.
+
+
+### Modality Switching
+If you wish to change the intensity of the device this can be done simply by altering this piece of code:
+```
+// Mode of intensity
+char subtle = 'S';
+char mediocre = 'M';
+char intensive = 'I';
+
+char mode = subtle;
+```
+Simply change `subtle` to `mediocre` or `intensive` depending on what you want. Then re-upload the code to the Feather HUZZAH
 
 
 ## Internet Access
