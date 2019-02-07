@@ -39,6 +39,7 @@ From here we want to install the ESP8266FS tool.
 ### Uploading the code to the Feather HUZZAH
 1. Connect any data-capable micro USB cable to the Feather HUZZAH and the other side to your computer's USB port. This can be done by carefully pushing the Feather HUZZAH down so it slightly sticks out of the bottom of its encasing box (as shown in the photo). 
 <img src=https://github.com/RaeJ/HabitFormationDevice/blob/master/photos/huzzah_access.jpg width="500" height="400" title="Accessing the Feather HUZZAH"/>
+
 2. Make sure that the Arduino Editor is set to the correct port (*Tools*->*Port*).
 3. If you have changed the .wav file in "data", or it is your first time uploading the file to the Feather Huzzah, click on *ESP8266 Sketch Data Upload* in *Tools* and wait for it to upload.
 4. When that is finished click the upload button in the Arduino Editor to upload the code to the Feather Huzzah.
