@@ -5,7 +5,7 @@ time the book will open up and use a variety of modalities to get the users' att
 from [SFX-I2S-web-trigger](https://github.com/bbx10/SFX-I2S-web-trigger) whilst the code used for being able to connect to
 Alexa is from [arduino-esp8266-alexa-wemo-switch](https://github.com/kakopappa/arduino-esp8266-alexa-wemo-switch).
 
-![alt text](https://github.com/RaeJ/HabitFormationDevice/blob/master/photos/open_book1.jpg "Multisensory Book")
+<img src=https://github.com/RaeJ/HabitFormationDevice/blob/master/photos/open_book1.jpg width="300" height="300" title="Multisensory Book"/>
 
 
 
@@ -32,12 +32,13 @@ Based off the [Arduino IDE for ESP8266](https://learn.adafruit.com/adafruit-feat
 
 From here we want to install the ESP8266FS tool.
 1. Download the tool: https://github.com/esp8266/arduino-esp8266fs-plugin/releases/download/0.1.3/ESP8266FS-0.1.3.zip.
-2. In your Arduino sketchbook directory, create tools directory if it doesn't exist yet. Unpack the tool into tools directory, the path should look like `<home_dir>/Arduino/tools/ESP8266FS/tool/esp8266fs.jar`. ![alt text](https://github.com/RaeJ/HabitFormationDevice/blob/master/photos/file_layout.png "File layout")
+2. In your Arduino sketchbook directory, create tools directory if it doesn't exist yet. Unpack the tool into tools directory, the path should look like `<home_dir>/Arduino/tools/ESP8266FS/tool/esp8266fs.jar`.<img src=https://github.com/RaeJ/HabitFormationDevice/blob/master/photos/file_layout.png width="300" height="200" title="File layout"/>
 3. Restart the Arduino Editor. Under *Tools* there should now be an option for *ESP8266 Sketch Data Upload*.
 
 
 ### Uploading the code to the Feather HUZZAH
-1. Connect any data-capable micro USB cable to the Feather HUZZAH and the other side to your computer's USB port. ![alt text](https://github.com/RaeJ/HabitFormationDevice/blob/master/photos/huzzah_access.jpg "Accessing the Feather HUZZAH") This can be done by carefully pushing the Feather HUZZAH down so it slightly sticks out of the bottom of its encasing box (as shown in the photo).
+1. Connect any data-capable micro USB cable to the Feather HUZZAH and the other side to your computer's USB port. This can be done by carefully pushing the Feather HUZZAH down so it slightly sticks out of the bottom of its encasing box (as shown in the photo). 
+<img src=https://github.com/RaeJ/HabitFormationDevice/blob/master/photos/huzzah_access.jpg width="500" height="400" title="Accessing the Feather HUZZAH"/>
 2. Make sure that the Arduino Editor is set to the correct port (*Tools*->*Port*).
 3. If you have changed the .wav file in "data", or it is your first time uploading the file to the Feather Huzzah, click on *ESP8266 Sketch Data Upload* in *Tools* and wait for it to upload.
 4. When that is finished click the upload button in the Arduino Editor to upload the code to the Feather Huzzah.
@@ -58,7 +59,7 @@ Simply change `char mode =` depending on what you want. Then re-upload the code 
 
 ### Controlling the device with Alexa
 1. Set up your Alexa device with the Alexa App.
-2. Make sure that you are connected to the internet and the device is powered on. ![alt text](https://github.com/RaeJ/HabitFormationDevice/blob/master/photos/components.jpg "Components set up")
+2. Make sure that you are connected to the internet and the device is powered on. <img src=https://github.com/RaeJ/HabitFormationDevice/blob/master/photos/components.jpg width="350" height="250" title="Components set up"/>
 3. Go into *Settings*->*Smart Home* and click *Add Device*. Alexa should discover the device under the friendly name you've chosen for it.
 4. From here you can treat the device as you would any other smart home device, you can create routines for it and turn it on and off with Alexa via voice command.
 
@@ -70,4 +71,4 @@ When setting up eduroam on the Raspberry Pi I initially made the mistake of runn
 
 Further to this, following Will Price's instructions did give me internet access, however, I initially had to repeat the process every time I restarted the Raspberry Pi. The easy fix for this was to move the terminal commands into the /etc/rc.local file.
 
-![alt text](https://github.com/RaeJ/HabitFormationDevice/blob/master/photos/eduroam_access.jpg "Eduroam access kit")
+<img src=https://github.com/RaeJ/HabitFormationDevice/blob/master/photos/eduroam_access.jpg width="400" height="400" title="Eduroam access kit"/>
